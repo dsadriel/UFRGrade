@@ -238,6 +238,9 @@ class UFRGSUtils:
                         horarios_locais.append({"Horário": horario_text, "Local": local})
 
                     class_info[headers[i]]= horarios_locais
+                elif headers[i] == "Professores":
+                    # Handle multiple professors
+                    class_info[headers[i]] = [prof.text.strip().split(" - ")[0] for prof in cell.find_all("li")]
                 else:
                     class_info[headers[i]] = cell.text.strip()
             current_discipline["Turmas"].append(class_info)

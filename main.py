@@ -5,12 +5,14 @@ import os
 from getpass import getpass
 from dotenv import load_dotenv
 from UFRGSUtils import UFRGSUtils
+from rich.console import Console
+from rich.table import Table
 
 def main():
     """
     Main function to demonstrate UFRGS portal login
     """
-    print("UFRGS Portal Login")
+    print("UFRGS Discipline Filtering and Validation")
     print("-" * 20)
     
     # Get credentials (you can also set these as environment variables)
@@ -61,14 +63,14 @@ def main():
 
 
     # Remove classes that don't met the student's course requirements
-    requirements_regex = r'(8:30|10:30)'
+    hours_requirements_regex = r'(8:30|10:30)'
 
     filtered_disciplines = []
     for disc in available_disciplines_for_student:
         # Only keep classes that meet the requirement
         matching_classes = [
             class_option for class_option in disc["Turmas"]
-            if any(re.search(requirements_regex, horario["Horário"]) for horario in class_option["Horários - Locais - Observações"])
+            if all(re.search(hours_requirements_regex, horario["Horário"]) for horario in class_option["Horários - Locais - Observações"])
         ]
 
         if matching_classes:
@@ -79,14 +81,24 @@ def main():
 
     print(f"Available disciplines for {course_name} ({course_code}):")
     for disc in filtered_disciplines:
-        print(f"--- {disc['Sigla']} ---")
-        print(f"Nome        : {disc['Nome']}")
+        console = Console()
+        table = Table(title=f"{disc['Sigla']} - {disc['Nome']}", show_lines=True)
+
+        table.add_column("Turma", style="cyan", no_wrap=True)
+        table.add_column("Professores", style="magenta")
+        table.add_column("Horários", style="green")
+
         for turma in disc["Turmas"]:
-            print(f"Turma       : {turma.get('Turmas', 'N/A')}")
-            print(f"Professor   : {turma.get('Professores', 'N/A')}")
-            print(f"Horarios    : {turma.get('Horários - Locais - Observações', 'N/A')}")
-            print("-" * 20)
-        print("-" * 40)
+            turma_id = turma.get('Turmas', 'N/A')
+            professores = ', '.join(turma.get('Professores', ['N/A']))
+            horarios = "\n".join(
+                f"{h.get('Horário', 'N/A')} - {h.get('Local', 'N/A')}"
+                for h in turma.get('Horários - Locais - Observações', [])
+            )
+            table.add_row(str(turma_id), professores, horarios)
+
+        console.print(table)
+        print("\n"*2)
     if not filtered_disciplines:
         print("No available disciplines found for the specified course and semester.")
         return
