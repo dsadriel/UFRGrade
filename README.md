@@ -1,165 +1,119 @@
 # UFRGrade
 
-A Python tool for interacting with the UFRGS (Universidade Federal do Rio Grande do Sul) portal system. This project provides automated session management and utilities for retrieving academic information such as course enrollment, eligible disciplines, and available classes.
+Uma ferramenta Python para interagir com o sistema do portal UFRGS (Universidade Federal do Rio Grande do Sul). Este projeto fornece gerenciamento automatizado de sessão e utilitários para recuperar informações acadêmicas como matrícula em cursos, disciplinas elegíveis e turmas disponíveis.
 
-## Requirements
+## Requisitos
 
 - Python 3.7+
-- Required packages (install via `pip install -r requirements.txt`):
+- Pacotes necessários (instale via `pip install -r requirements.txt`):
   - `requests`
   - `beautifulsoup4`
   - `python-dotenv`
   - `rich`
 
-## Installation
+## Instalação
 
-1. **Clone the repository:**
+1. **Clone o repositório:**
    ```bash
    git clone https://github.com/dsadriel/UFRGrade.git
    cd UFRGrade
    ```
 
-2. **Create a virtual environment:**
+2. **Crie um ambiente virtual:**
    ```bash
    python -m venv .venv
-   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+   source .venv/bin/activate  # No Windows: .venv\Scripts\activate
    ```
 
-3. **Install dependencies:**
+3. **Instale as dependências:**
    ```bash
    pip install -r requirements.txt
    ```
 
-4. **Set up environment variables (optional):**
-   Create a `.env` file in the root directory:
+4. **Configure as variáveis de ambiente (opcional):**
+   Crie um arquivo `.env` no diretório raiz:
    ```
-   UFRGS_USERNAME=your_username
-   UFRGS_PASSWORD=your_password
+   UFRGS_USERNAME=seu_usuario
+   UFRGS_PASSWORD=sua_senha
    UFRGS_SEMESTER=2025/1
+   UFRGS_TIME_FILTER=8:30|10:30
    ```
 
-## Usage
+## Uso
 
-### Basic Usage
+### Uso Básico
 
-Run the main script to get available disciplines for your course:
+Execute o script principal para obter disciplinas disponíveis para seu curso:
 
 ```bash
 python main.py
 ```
 
-The script will:
-1. Prompt for your UFRGS credentials (if not in `.env`)
-2. Log into the UFRGS portal
-3. Retrieve your course information
-4. Find eligible disciplines
-5. Filter available classes by your schedule preferences
-6. Display the results
+O script irá:
+1. Solicitar suas credenciais UFRGS (se não estiverem no `.env`)
+2. Fazer login no portal UFRGS
+3. Recuperar informações do seu curso
+4. Encontrar disciplinas elegíveis
+5. Filtrar turmas disponíveis por suas preferências de horário
+6. Exibir os resultados
 
-### Using the Session Manager
-
-```python
-from UFRGSSession import create_session, UFRGSLoginError
-
-try:
-    # Create a new session
-    session = create_session("your_username", "your_password")
-    
-    # Make authenticated requests
-    response = session.make_authenticated_request("https://www1.ufrgs.br/sistemas/portal/some_page")
-    
-    # Save session for later use
-    session.save_session()
-    
-    # Check if session is still valid
-    if session.is_session_valid():
-        print("Session is active")
-    
-except UFRGSLoginError as e:
-    print(f"Login failed: {e}")
-```
-
-### Using the Utilities
+### Usando os Utilitários
 
 ```python
 from UFRGSSession import create_session
 from UFRGSUtils import UFRGSUtils
 
-# Create session
-session = create_session("username", "password")
+# Criar sessão
+session = create_session("usuario", "senha")
 
-# Initialize utilities
+# Inicializar utilitários
 utils = UFRGSUtils(session)
 
-# Get course information
+# Obter informações do curso
 course_name = utils.get_student_course_name()
 course_code = utils.get_course_code(course_name)
 
-# Get available disciplines
+# Obter disciplinas disponíveis
 eligible = utils.get_eligible_disciplines()
 available = utils.get_available_disciplines_for_semester_and_course("2025/1", course_code)
 ```
 
-## Project Structure
+## Configuração
 
-```
-UFRGrade/
-├── main.py              # Main application script
-├── UFRGSSession.py      # Session management and authentication
-├── UFRGSUtils.py        # Utility functions for UFRGS data
-├── .env                 # Environment variables (create this)
-├── .gitignore          # Git ignore file
-└── README.md           # This file
-```
+### Variáveis de Ambiente
 
-## Core Components
+- `UFRGS_USERNAME`: Seu nome de usuário do portal UFRGS
+- `UFRGS_PASSWORD`: Sua senha do portal UFRGS
+- `UFRGS_SEMESTER`: Semestre no formato AAAA/X (ex: "2025/1")
+- `UFRGS_TIME_FILTER`: Padrão regex de filtro de horário (ex: "8:30|10:30" para aulas matutinas)
 
-### UFRGSSession
+### Filtro de Horários
 
-The `UFRGSSession` class provides:
+A aplicação permite filtrar turmas por horário. Você pode configurar isso de várias maneiras:
 
-- **Authentication**: Secure login to UFRGS portal
-- **Session Management**: Save/load sessions to avoid repeated logins
-- **Request Handling**: Make authenticated HTTP requests
-- **Session Validation**: Check if current session is still active
+1. **Variável de Ambiente**: Defina `UFRGS_TIME_FILTER` no seu arquivo `.env`:
+   ```
+   # Aulas matutinas
+   UFRGS_TIME_FILTER=8:30|10:30
+   
+   # Aulas vespertinas  
+   UFRGS_TIME_FILTER=14:30|16:30
+   
+   # Horários específicos
+   UFRGS_TIME_FILTER=8:30|14:30|19:00
+   ```
 
-### UFRGSUtils
+2. **Entrada Interativa**: Se não definido no `.env`, o script solicitará que você digite seus horários preferidos.
 
-The `UFRGSUtils` class provides:
 
-- **Course Information**: Get student course enrollment details
-- **Discipline Data**: Retrieve eligible and available disciplines
-- **Schedule Filtering**: Filter classes by time and other criteria
-- **Data Parsing**: Extract structured data from UFRGS portal pages
+## Licença
 
-## Configuration
+Este projeto está licenciado sob a Licença MIT. Isso significa que você pode usar, copiar, modificar e distribuir o software livremente, desde que mantenha o aviso de copyright e a licença. O software é fornecido "no estado em que se encontra" (as-is), sem garantias de qualquer tipo. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
-### Environment Variables
+## Aviso Legal
 
-- `UFRGS_USERNAME`: Your UFRGS portal username
-- `UFRGS_PASSWORD`: Your UFRGS portal password  
-- `UFRGS_SEMESTER`: Semester in YYYY/X format (e.g., "2025/1")
-
-### Schedule Filtering
-
-The application includes example filtering for morning classes (8:30 and 10:30). You can modify the regex pattern in `main.py`:
-
-```python
-# Current filter for morning classes
-hours_requirements_regex = r'(8:30|10:30)'
-
-# Example: Filter for afternoon classes
-hours_requirements_regex = r'(14:30|16:30)'
-```
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Disclaimer
-
-This tool is for educational purposes only. Please use responsibly and in accordance with UFRGS terms of service. The authors are not responsible for any misuse of this software.
+Esta ferramenta é apenas para fins educacionais. Use com responsabilidade e de acordo com os termos de serviço da UFRGS. Os autores não são responsáveis por qualquer uso indevido deste software.
 
 ---
 
-**Note**: This project is not officially affiliated with UFRGS. It's an independent tool created to help students interact with the portal system more efficiently.
+**Nota**: Este projeto não é oficialmente afiliado à UFRGS. É uma ferramenta independente criada para ajudar estudantes a interagir com o sistema do portal de forma mais eficiente.

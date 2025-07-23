@@ -420,8 +420,8 @@ if __name__ == "__main__":
         # Create session
         ufrgs_session = create_session(username, password)
         
-        print("Successfully logged in to UFRGS portal!")
-        print("Session cookies:", ufrgs_session.get_session_cookies())
+        print("Login realizado com sucesso no portal UFRGS!")
+        print("Cookies da sessão:", ufrgs_session.get_session_cookies())
         
         # Example of making an authenticated request
         # response = ufrgs_session.make_authenticated_request("https://www1.ufrgs.br/sistemas/portal/some_page")
@@ -430,6 +430,6 @@ if __name__ == "__main__":
         ufrgs_session.logout()
         
     except UFRGSLoginError as e:
-        print(f"Login failed: {e}")
+        print(f"Falha no login: {e}")
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Erro: {e}")
